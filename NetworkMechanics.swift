@@ -11,6 +11,11 @@ import SystemConfiguration
 
 class NetworkMechanics {
     
+    let IP = "";
+    let IPV6 = "";
+    let PORT = 0;
+    let PORT_FOR_V6 = 1;
+    
     func sendAndReceive(requestMessage: String, answer: UnsafeMutablePointer<String>) {
         let socket = determineSocket()
         
@@ -110,14 +115,14 @@ class NetworkMechanics {
         if checkNetworkForIP() {
             socket = Socket(
                 ipV6 : true,
-                ipAddress : "2a01:238:4382:e600:546c:2945:701a:f34c",
-                port: 21001
+                ipAddress : IPV6,
+                port: PORT_FOR_V6
             )
         } else {
             socket = Socket(
                 ipV6 : false,
-                ipAddress : "81.169.242.190",
-                port: 21001
+                ipAddress : IP,
+                port: PORT
             )
         }
         

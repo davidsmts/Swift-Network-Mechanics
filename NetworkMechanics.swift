@@ -11,10 +11,17 @@ import SystemConfiguration
 
 class NetworkMechanics {
     
-    let IP = "";
-    let IPV6 = "";
-    let PORT = 0;
-    let PORT_FOR_V6 = 1;
+    var ipv4 = String()
+    var ipv6 = String()
+    var port4 = Int()
+    var port6 = Int()
+    
+    init(ipv4: String?, ipv6: String?, port4: Int?, port6: Int?) {
+        self.ipv4 = ipv4 ?? "127.0.0.1"
+        self.ipv6 = ipv6 ?? "::1"
+        self.port4 = port4 ?? 5050
+        self.port6 = port6 ?? 5051
+    }
     
     func sendAndReceive(requestMessage: String, answer: UnsafeMutablePointer<String>) {
         let socket = determineSocket()
@@ -34,7 +41,7 @@ class NetworkMechanics {
                 print(inputStream!.hasBytesAvailable)
             }
         }
-            
+        
         send(message: requestMessage, to: &outputStream)
         answer.pointee = readAll(from: &inputStream)
         outputStream!.close()
@@ -115,20 +122,20 @@ class NetworkMechanics {
         if checkNetworkForIP() {
             socket = Socket(
                 ipV6 : true,
-                ipAddress : IPV6,
-                port: PORT_FOR_V6
+                ipAddress : self.ipv6,
+                port: self.port4
             )
         } else {
             socket = Socket(
                 ipV6 : false,
-                ipAddress : IP,
-                port: PORT
+                ipAddress : self.ipv4,
+                port: self.port4
             )
         }
         
         return socket
     }
-        
+    
     
     func checkNetworkForIP() -> Bool {
         print("checkNetworkForIP is called")
@@ -136,7 +143,6 @@ class NetworkMechanics {
         var address : String?
         var boolval = Bool()
         
-        print(isConnectedToNetwork())
         if isConnectedToNetwork() {
             boolval = false
         } else {
@@ -161,25 +167,21 @@ class NetworkMechanics {
                                         nil, socklen_t(0), NI_NUMERICHOST)
                             address = String(cString: hostname)
                         }
-                        
                     }
                 }
                 
                 freeifaddrs(ifaddr)
             }
-
-            print(address!)
+            
             if address!.components(separatedBy: ":").count > 1 {
                 print(address!.components(separatedBy: ":").count)
-                print("IPV6")
                 boolval = true
             } else if address!.components(separatedBy: ".").count > 1 {
                 print(address!.components(separatedBy: ".").count)
-                print("IPV4")
                 boolval = false
             }
         }
-
+        
         return boolval
     }
     

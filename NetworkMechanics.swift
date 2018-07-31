@@ -15,12 +15,14 @@ class NetworkMechanics {
     var ipv6 = String()
     var port4 = Int()
     var port6 = Int()
+    var endTag = String()
     
-    init(ipv4: String?, ipv6: String?, port4: Int?, port6: Int?) {
+    init(ipv4: String?, ipv6: String?, port4: Int?, port6: Int?, endTag: String?) {
         self.ipv4 = ipv4 ?? "127.0.0.1"
         self.ipv6 = ipv6 ?? "::1"
         self.port4 = port4 ?? 5050
         self.port6 = port6 ?? 5051
+        self.endTag = endTag ?? "end"
     }
     
     func sendAndReceive(requestMessage: String, answer: UnsafeMutablePointer<String>) {
@@ -38,7 +40,7 @@ class NetworkMechanics {
         outputStream!.open()
         DispatchQueue.global(qos: .background).async {
             while true {
-                print(inputStream!.hasBytesAvailable)
+                //print(inputStream!.hasBytesAvailable)
             }
         }
         
@@ -59,13 +61,14 @@ class NetworkMechanics {
         var fullMessage = NSString()
         var byteCount = 0
         while true {
-            print(from.pointee!.hasBytesAvailable)
+            print("still listening")
             var buffer = Array<UInt8>(repeating: 0, count: bufferSize)
             let bytesRead = from.pointee!.read(&buffer, maxLength: bufferSize)
             byteCount += bytesRead
             let output = NSString(bytes: &buffer, length: bufferSize, encoding: String.Encoding.utf8.rawValue)
             fullMessage = NSString(format: "%@%@", fullMessage, output!)
-            if (output?.contains("<-->!end!<-->"))! {
+            if (output?.contains(self.endTag))! {
+                print("breaking")
                 break
             }
         }
